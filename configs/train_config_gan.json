@@ -1,0 +1,131 @@
+{
+  "MODEL": {
+    "TYPE": "GAN",
+    "GEN": {
+      "TYPE": "SwinIR",
+      "UPSCALE": 4,
+      "IMG_SIZE": [128, 128],
+      "WINDOW_SIZE": 8,
+      "IMG_RANGE": 1.0,
+      "DEPTHS": [6, 6, 6, 6, 6, 6],
+      "EMBED_DIM": 78,
+      "NUM_HEADS": [6, 6, 6, 6, 6, 6],
+      "MLP_RATIO": 2,
+      "UPSAMPLER": "pixelshuffledirect",
+      "RESI_CONNECTION": "1conv"
+    },
+    "DISC": {
+      "TYPE": "UNetDiscriminatorSN",
+      "NUM_IN_CH": 3,
+      "NUM_FEAT": 24,
+      "SKIP_CONNECTION": true
+    }
+  },
+
+  "DATA": {
+    "DATA_AUGMENTATION": {
+      "RESIZE_RESOLUTION": 512,
+      "TARGET_RESOLUTION": 512,
+      "RANDOM_HORIZONTAL_FLIP": true,
+      "RANDOM_CROP": false
+    },
+    "BLUR": {
+      "BLUR_KERNEL_SIZE": 21,
+      "KERNEL_LIST": [
+        "iso",
+        "aniso",
+        "generalized_iso",
+        "generalized_aniso",
+        "plateau_iso",
+        "plateau_aniso"
+      ],
+      "KERNEL_PROB": [0.45, 0.25, 0.12, 0.03, 0.12, 0.03],
+      "SINC_PROB": 0.1,
+      "BLUR_SIGMA": [0.2, 3],
+      "BETAG_RANGE": [0.5, 4],
+      "BETAP_RANGE": [1, 2],
+
+      "BLUR_KERNEL_SIZE2": 21,
+      "KERNEL_LIST2": [
+        "iso",
+        "aniso",
+        "generalized_iso",
+        "generalized_aniso",
+        "plateau_iso",
+        "plateau_aniso"
+      ],
+      "KERNEL_PROB2": [0.45, 0.25, 0.12, 0.03, 0.12, 0.03],
+      "SINC_PROB2": 0.1,
+      "BLUR_SIGMA2": [0.2, 1.5],
+      "BETAG_RANGE2": [0.5, 4],
+      "BETAP_RANGE2": [1, 2]
+    },
+    "FILTER": {
+      "RESIZE_PROB": [0.2, 0.7, 0.1],
+      "RESIZE_RANGE": [0.2, 1.5],
+      "GAUSSIAN_NOISE_PROB": 0.5,
+      "NOISE_RANGE": [1, 20],
+      "POISSON_SCALE_RANGE": [0.05, 2],
+      "GRAY_NOISE_PROB": 0.4,
+      "JPEG_RANGE": [50, 95],
+
+      "SECOND_BLUR_PROB": 0.8,
+      "RESIZE_PROB2": [0.3, 0.4, 0.3],
+      "RESIZE_RANGE2": [0.3, 1.2],
+      "GAUSSIAN_NOISE_PROB2": 0.5,
+      "NOISE_RANGE2": [1, 15],
+      "POISSON_SCALE_RANGE2": [0.05, 1.5],
+      "GRAY_NOISE_PROB2": 0.4,
+      "JPEG_RANGE2": [70, 95],
+
+      "FINAL_SINC_PROB": 0.8
+    }
+  },
+
+  "ACCELERATOR": {
+    "MIXED_PRECISION": "bf16",
+    "GRADIENT_ACCUMULATION_STEPS": 1,
+    "MAX_GRAD_NORM": 1.0
+  },
+
+  "TRAINING": {
+    "EMA_DECAY": 0.999,
+    "EPOCHS": 300,
+    "BATCH_SIZE": { "TRAIN": 4, "TEST": 4 },
+    "BUFFER_TIMES": 22,
+    "LOSS": {
+      "PIXEL_LOSS": { "WEIGHT": 1.0, "TYPE": "l1", "GT_USM": true },
+      "PERCEPTUAL_LOSS": {
+        "WEIGHT": 1.0,
+        "LAYER_WEIGHTS": {
+          "conv1_2": 0.1,
+          "conv2_2": 0.1,
+          "conv3_4": 1,
+          "conv4_4": 1,
+          "conv5_4": 1
+        },
+        "VGG_TYPE": "vgg19",
+        "USE_INPUT_NORM": true,
+        "STYLE_WEIGHT": 0,
+        "RANGE_NORM": false,
+        "CRITERION": "l1",
+        "GT_USM": true
+      },
+      "GAN_LOSS": {
+        "WEIGHT": 1e-1,
+        "GAN_TYPE": "vanilla",
+        "REAL_LABEL_VAL": 1.0,
+        "FAKE_LABEL_VAL": 0.0,
+        "GT_USM": false
+      }
+    },
+    "ADAM_OPTIMIZER": {
+      "LEARNING_RATE": 2e-4,
+      "BETA1": 0.9,
+      "BETA2": 0.999,
+      "WEIGHT_DECAY": 0,
+      "EPSILON": 1e-8
+    },
+    "LR_SCHEDULER": { "TYPE": "cosine", "WARMUP_STEPS": 0 }
+  }
+}
