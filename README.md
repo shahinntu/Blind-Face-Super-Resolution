@@ -11,8 +11,6 @@ This project focuses on the super-resolution of low-quality facial images using 
 - [Configuration](#configuration)
 - [Training Process](#training-process)
 - [Evaluation](#evaluation)
-- [Results](#results)
-- [Contributing](#contributing)
 
 ## Project Overview
 
