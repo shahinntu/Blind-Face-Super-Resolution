@@ -214,4 +214,3 @@ pyrightconfig.json
 
 *.png
 data/**/*.txt
-model_logs/
